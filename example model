@@ -1,0 +1,94 @@
+
+import java.util.BitSet;
+
+class Message {
+    String data;
+    public Message(String data) {
+        this.data = data;
+    }
+}
+
+// Physical layer
+class PhysicalLayer {
+    public static BitSet encode(Message message) {
+        System.out.println("Physical Layer: Encoding the message into bits");
+        return BitSet.valueOf(message.data.getBytes());
+    }
+
+    public static Message decode(BitSet bits) {
+        System.out.println("Physical Layer: Decoding bits into a message");
+        byte[] bytes = bits.toByteArray();
+        return new Message(new String(bytes));
+    }
+}
+
+// Data Link layer
+class DataLinkLayer {
+    public static BitSet frame(Message message) {
+        System.out.println("Data Link Layer: Framing the message");
+        return PhysicalLayer.encode(message);
+    }
+
+    public static Message deframe(BitSet bits) {
+        System.out.println("Data Link Layer: Deframing bits");
+        return PhysicalLayer.decode(bits);
+    }
+}
+
+// Network layer
+class NetworkLayer {
+    public static Message encapsulate(Message message) {
+        System.out.println("Network Layer: Encapsulating the message");
+        return DataLinkLayer.deframe(DataLinkLayer.frame(message));
+    }
+
+    public static Message decapsulate(Message message) {
+        System.out.println("Network Layer: Decapsulating the message");
+        return DataLinkLayer.deframe(DataLinkLayer.frame(message));
+    }
+}
+
+// Transport layer
+class TransportLayer {
+    public static Message segment(Message message) {
+        System.out.println("Transport Layer: Segmenting the message");
+        return NetworkLayer.decapsulate(NetworkLayer.encapsulate(message));
+    }
+
+    public static Message reassemble(Message message) {
+        System.out.println("Transport Layer: Reassembling segments");
+        return NetworkLayer.decapsulate(NetworkLayer.encapsulate(message));
+    }
+    }
+
+// Session layer
+class SessionLayer {
+    public static Message manageSessions(Message message) {
+        System.out.println("Session Layer: Managing sessions");
+        return TransportLayer.reassemble(TransportLayer.segment(message));
+    }
+}
+
+// Presentation layer
+class PresentationLayer {
+    public static Message translate(Message message) {
+        System.out.println("Presentation Layer: Translating the message");
+        return SessionLayer.manageSessions(SessionLayer.manageSessions(message));
+    }
+}
+
+// Application layer
+class ApplicationLayer {
+    public static void main(String[] args) {
+        Message originalMessage = new Message("Hello, OSI Model!");
+        System.out.println("Original Message: " + originalMessage.data);
+        Message finalMessage = PresentationLayer.translate(originalMessage);
+        System.out.println("Final Message: " + finalMessage.data);
+    }
+}
+
+public class OsiModel {
+    public static void main(String[] args) {
+        ApplicationLayer.main(args);
+    }
+}
